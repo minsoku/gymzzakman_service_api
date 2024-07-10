@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { firstValueFrom, throwError } from 'rxjs';
 import { AxiosError } from 'axios';
 
@@ -22,11 +22,7 @@ export class UsersService {
       existNicknameQuery,
     )) as Users[] | [];
 
-    if (existNickname.length > 0) {
-      console.error('EXIST_NICKNAME');
-      throw new BadRequestException('EXIST_NICKNAME');
-    }
-    return true;
+    return existNickname[0]?.nickname;
   }
 
   async existPhoneNumber(phoneNumber: string) {
@@ -35,11 +31,7 @@ export class UsersService {
       existPhoneNumberQuery,
     )) as Users[] | [];
 
-    if (existPhoneNumber.length > 0) {
-      console.error('EXIST_PHONE');
-      throw new BadRequestException('EXIST_PHONE');
-    }
-    return true;
+    return existPhoneNumber[0]?.phoneNumber;
   }
 
   async existEmail(email: string) {
@@ -47,12 +39,7 @@ export class UsersService {
     const existEmail = (await this.mysqlService.query(existEmailQuery)) as
       | Users[]
       | [];
-
-    if (existEmail.length > 0) {
-      console.error('EXIST_EMAIL');
-      throw new BadRequestException('EXIST_EMAIL');
-    }
-    return true;
+    return existEmail[0];
   }
   async createUser(user: RegisterEmail, file: Express.Multer.File) {
     const existEmail = await this.existEmail(user.email);
@@ -60,7 +47,7 @@ export class UsersService {
     const existPhoneNumber = await this.existPhoneNumber(user.phoneNumber);
     const profileImage = await this.awsService.saveImage(file, 'profile');
 
-    if (existEmail && existNickname && existPhoneNumber) {
+    if (!existEmail && !existNickname && !existPhoneNumber) {
       const url = 'http://localhost:4000/auth/register/email';
       const data: RegisterEmail = {
         email: user.email,
