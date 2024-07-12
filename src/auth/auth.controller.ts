@@ -31,8 +31,10 @@ export class AuthController {
   }
   @Post('login/email')
   @UseGuards(BasicTokenGuard)
-  postLoginEmail(@Body() body: any) {
-    return this.authService.loginWithEmail(body);
+  postLoginEmail(@Headers('authorization') rawToken: string) {
+    const token = this.authService.extractTokenFromHeader(rawToken, false);
+    const credentials = this.authService.decodeBasicToken(token);
+    return this.authService.loginWithEmail(credentials);
   }
 
   @Post('token/refresh')
