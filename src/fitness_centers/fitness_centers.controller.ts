@@ -17,7 +17,6 @@ export class FitnessCentersController {
 
   @Get('/filter')
   getFilterFitnessCenter(@Query() filter: any) {
-    console.log(filter);
     return this.fitnessCentersService.getFitnessPriceByFilter(filter);
   }
 }

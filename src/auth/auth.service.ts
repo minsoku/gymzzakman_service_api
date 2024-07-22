@@ -75,14 +75,17 @@ export class AuthService {
   }
 
   signToken(
-    user: Pick<Users, 'id' | 'email' | 'name' | 'nickname' | 'profileImage'>,
+    user: Pick<
+      Users,
+      'user_id' | 'email' | 'name' | 'nickname' | 'profileImage'
+    >,
     isAccessToken: boolean,
   ) {
     const payload = {
       email: user.email,
       name: user.name,
       nickname: user.nickname,
-      sub: user.id,
+      sub: user.user_id,
       type: isAccessToken ? 'access' : 'refresh',
     };
     return this.jwtService.sign(payload, {
@@ -93,12 +96,15 @@ export class AuthService {
   }
 
   loginUser(
-    user: Pick<Users, 'id' | 'email' | 'name' | 'nickname' | 'profileImage'>,
+    user: Pick<
+      Users,
+      'user_id' | 'email' | 'name' | 'nickname' | 'profileImage'
+    >,
   ) {
     return {
       accessToken: this.signToken(user, true),
       refreshToken: this.signToken(user, false),
-      id: user.id,
+      id: user.user_id,
       email: user.email,
       name: user.name,
       nickname: user.nickname,

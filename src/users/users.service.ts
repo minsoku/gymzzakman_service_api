@@ -7,6 +7,11 @@ import { Users } from './dto/Users';
 import { RegisterEmail } from 'src/auth/dto/registerEmail';
 import { HttpService } from '@nestjs/axios';
 import { AwsService } from 'src/aws/aws.service';
+import { ConfigService } from '@nestjs/config';
+import {
+  ENV_DB_SERVER_API,
+  ENV_PROTOCOL,
+} from 'src/common/const/env-keys.const';
 
 @Injectable()
 export class UsersService {
@@ -14,6 +19,7 @@ export class UsersService {
     private readonly mysqlService: MysqlService,
     private readonly httpService: HttpService,
     private readonly awsService: AwsService,
+    private readonly configService: ConfigService,
   ) {}
 
   async existNickname(nickname: string) {
@@ -58,7 +64,7 @@ export class UsersService {
 
     const profileImage = await this.awsService.saveImage(file, 'profile');
 
-    const url = 'http://localhost:4000/auth/register/email';
+    const url = `${this.configService.get(ENV_PROTOCOL)}${this.configService.get(ENV_DB_SERVER_API)}/auth/register/email`;
     const data: RegisterEmail = {
       email: user.email,
       password: user.password,
@@ -78,8 +84,8 @@ export class UsersService {
       };
     } catch (error) {
       if (error instanceof AxiosError) {
-        console.error('Axios 오류:', error);
-        return new Error('내부 서버 오류가 발생했습니다');
+        console.error('Axios Error:', error);
+        return new Error('INTERNAL_ERROR');
       }
       throw error; // 예상치 못한 오류는 다시 throw
     }

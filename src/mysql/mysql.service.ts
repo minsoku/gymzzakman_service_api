@@ -34,7 +34,7 @@ export class MysqlService {
     return new Promise((resolve, reject) => {
       this.connection.query(_query, values, (err, res) => {
         if (err) {
-          console.log(err);
+          console.error(err);
           return reject(err);
         }
         return resolve(res);

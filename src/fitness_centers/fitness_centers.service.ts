@@ -22,7 +22,6 @@ export class FitnessCentersService {
   }
 
   async getFitnessPriceByFilter(params: any) {
-    console.log(params);
     const newParam = {
       minPrice: parseInt(params.minPrice) * 10000,
       maxPrice: parseInt(params.maxPrice) * 10000,

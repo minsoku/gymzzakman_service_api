@@ -6,6 +6,8 @@ export const ENV_AWS_SECRET_ACCESS_KEY = 'AWS_SECRET_ACCESS_KEY';
 export const ENV_AWS_REGION = 'AWS_REGION';
 export const ENV_AWS_BUCKET_NAME = 'AWS_BUCKET_NAME';
 
+export const ENV_DB_SERVER_API = 'DB_SERVER_API';
+
 export const ENV_PROTOCOL = 'PROTOCOL';
 export const ENV_DB_HOST = 'DB_HOST';
 export const ENV_DB_PORT = 'DB_PORT';
