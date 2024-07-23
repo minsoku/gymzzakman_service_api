@@ -16,7 +16,7 @@ export class BearerTokenGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     const rawToken = req.headers['authorization'];
-    if (!rawToken) {
+    if (!rawToken || rawToken.slice(7) === 'undefined') {
       throw new UnauthorizedException('BearerTokenGuard : Token not found');
     }
 

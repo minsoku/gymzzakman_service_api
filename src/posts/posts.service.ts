@@ -24,10 +24,10 @@ export class PostsService {
     private readonly configService: ConfigService,
   ) {}
 
-  async getTotalPostsCount(category: string) {
-    let query = `SELECT COUNT(*) AS count FROM POSTS`;
+  async getTotalPostsCount(category: string, search: string) {
+    let query = `SELECT COUNT(*) AS count FROM POSTS WHERE content LIKE '%${search}%'`;
     if (category !== '') {
-      query = `SELECT COUNT(*) AS count FROM POSTS WHERE category = '${category}'`;
+      query = `SELECT COUNT(*) AS count FROM POSTS WHERE category = '${category}' AND content LIKE '%${search}%'`;
     }
     const result = await this.mysqlService.query(query);
     return result[0];
@@ -35,9 +35,9 @@ export class PostsService {
 
   async paginatePosts(dto: PaginatePostDto) {
     const { page, category, search } = dto;
-    const total = await this.getTotalPostsCount(category);
+    const total = await this.getTotalPostsCount(category, search);
     const pageNum = parseInt(page, 10);
-    const pageSize = 11;
+    const pageSize = 10;
     const offset = (pageNum - 1) * pageSize;
     const conditions: string[] = [];
     const params: any[] = [];
@@ -46,8 +46,6 @@ export class PostsService {
     if (category) {
       conditions.push(`P.category = ?`);
       params.push(category);
-    } else {
-      conditions.push(`P.category = 'INFORMATION'`);
     }
 
     if (search) {
@@ -62,6 +60,7 @@ export class PostsService {
       LEFT JOIN COMMENTS C ON P.id = C.post_id
       LEFT JOIN USERS U ON P.author_id = U.user_id
       LEFT JOIN USERS CU ON C.user_id = CU.user_id
+      WHERE 1=1
       ${conditions.length > 0 ? 'AND ' + conditions.join(' AND ') : ''}
       ORDER BY created_at DESC
       LIMIT ?, ?
@@ -70,6 +69,7 @@ export class PostsService {
       query,
       params,
     )) as QueryResult;
+
     const posts = [];
     results.forEach((row) => {
       let postIndex = posts.findIndex((post) => post.id === row.id);

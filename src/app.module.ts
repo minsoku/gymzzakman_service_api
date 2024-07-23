@@ -10,6 +10,7 @@ import { AwsModule } from './aws/aws.module';
 import { UtilModule } from './util/util.module';
 import { FitnessCentersModule } from './fitness_centers/fitness_centers.module';
 import { PostsModule } from './posts/posts.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PostsModule } from './posts/posts.module';
     UtilModule,
     FitnessCentersModule,
     PostsModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
