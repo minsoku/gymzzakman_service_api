@@ -6,7 +6,6 @@ import {
 import { PaginatePostDto } from './dto/paginate-post.dto';
 import { CommonService } from 'src/common/common.service';
 import { PostBodyDto } from './dto/post.dto';
-import { AwsService } from 'src/aws/aws.service';
 import { MysqlService } from 'src/mysql/mysql.service';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -17,30 +16,31 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { QueryResult } from './types/post';
+import { CommentsService } from 'src/comments/comments.service';
 
 @Injectable()
 export class PostsService {
   constructor(
     private readonly commonService: CommonService,
-    private readonly awsService: AwsService,
+    private readonly commentsService: CommentsService,
     private readonly mysqlService: MysqlService,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {}
 
   async deletePost(userId: number, id: string) {
-    const query = `SELECT author_id FROM POSTS WHERE author_id = ? AND id = ?`;
-    const checkUser = (await this.mysqlService.query(query, [userId, id])) as [
-      number,
-    ];
+    const url = `${this.configService.get(ENV_PROTOCOL)}${this.configService.get(ENV_DB_SERVER_API)}/community/post?id=${id}`;
+    const checkQuery = `SELECT author_id FROM POSTS WHERE author_id = ? AND id = ?`;
+    const checkUser = (await this.mysqlService.query(checkQuery, [
+      userId,
+      id,
+    ])) as [number];
     if (checkUser.length < 1) {
       throw new ForbiddenException(
         'deletePost : You can only delete your own posts.',
       );
     }
-
-    const url = `${this.configService.get(ENV_PROTOCOL)}${this.configService.get(ENV_DB_SERVER_API)}/community/post?id=${id}`;
-
+    await this.commentsService.deletePostAllComment(id);
     try {
       const response = await firstValueFrom(this.httpService.delete(url));
       return {
@@ -55,7 +55,6 @@ export class PostsService {
       }
       throw error;
     }
-    console.log(userId, id);
   }
 
   async getTotalPostsCount(category: string, search: string) {

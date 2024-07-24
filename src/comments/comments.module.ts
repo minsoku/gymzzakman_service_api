@@ -11,5 +11,6 @@ import { ConfigModule } from '@nestjs/config';
   imports: [MysqlModule, HttpModule, UsersModule, AuthModule, ConfigModule],
   controllers: [CommentsController],
   providers: [CommentsService],
+  exports: [CommentsService],
 })
 export class CommentsModule {}

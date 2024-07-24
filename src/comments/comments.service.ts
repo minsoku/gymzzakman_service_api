@@ -26,7 +26,33 @@ export class CommentsService {
       `SELECT * FROM COMMENTS WHERE post_id = ?`,
       [postId],
     );
-    console.log(result);
+    // console.log(result);
+  }
+
+  async deletePostAllComment(id: string) {
+    const url = `${this.configService.get(ENV_PROTOCOL)}${this.configService.get(ENV_DB_SERVER_API)}/comment/post?id=${id}`;
+    const commentCheckQuery = `SELECT COUNT(C.user_id) AS count FROM POSTS P LEFT JOIN COMMENTS C ON P.id = C.post_id WHERE P.id = ?`;
+    const checkComment = await this.mysqlService.query(commentCheckQuery, [id]);
+    if (checkComment[0].count > 0) {
+      try {
+        const response = await firstValueFrom(this.httpService.delete(url));
+        return {
+          statusCode: response.status,
+          success: true,
+          message: 'Delete Post All Comment',
+        };
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          console.error('Axios Error:', error);
+          throw new InternalServerErrorException('DB_API : INTERNAL_ERROR');
+        }
+        throw error;
+      }
+    } else {
+      return {
+        success: true,
+      };
+    }
   }
 
   async createComment(authorId: number, body: ICreateCommentBody) {

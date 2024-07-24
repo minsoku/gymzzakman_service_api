@@ -7,6 +7,7 @@ import { MysqlModule } from 'src/mysql/mysql.module';
 import { HttpModule } from '@nestjs/axios';
 import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { CommentsModule } from 'src/comments/comments.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from 'src/auth/auth.module';
     HttpModule,
     UsersModule,
     AuthModule,
+    CommentsModule,
   ],
   controllers: [PostsController],
   providers: [PostsService],
