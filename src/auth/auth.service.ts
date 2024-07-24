@@ -91,7 +91,7 @@ export class AuthService {
     return this.jwtService.sign(payload, {
       secret: this.configService.get(ENV_JWT_SECRET_KEY),
       algorithm: 'HS256',
-      expiresIn: isAccessToken ? '30m' : '360m',
+      expiresIn: isAccessToken ? '1h' : '6h',
     });
   }
 
@@ -114,16 +114,16 @@ export class AuthService {
 
   async authenticateWithEmail(user: Pick<Users, 'email' | 'password'>) {
     const existingUser = await this.usersService.existEmail(user.email);
-    if (existingUser) {
-      const passOk = await bcrypt.compare(user.password, existingUser.password);
-      if (!passOk) {
-        throw new UnauthorizedException(
-          'authenticateWithEmail : PASSWORD_NOT_MATCH',
-        );
-      }
-      return existingUser;
-    } else {
+    if (!existingUser) {
       throw new NotFoundException('authenticateWithEmail : USER_NOT_FOUND');
+    }
+    const passOk = await bcrypt.compare(user.password, existingUser.password);
+    if (!passOk) {
+      throw new UnauthorizedException(
+        'authenticateWithEmail : PASSWORD_NOT_MATCH',
+      );
+    } else {
+      return existingUser;
     }
   }
 

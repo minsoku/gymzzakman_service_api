@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   Query,
   UploadedFile,
@@ -57,5 +59,11 @@ export class PostsController {
         statusCode: err.response.statusCode,
       };
     }
+  }
+
+  @Delete(':id')
+  @UseGuards(AccessTokenGuard)
+  deletePost(@User('user_id') userId: number, @Param('id') id: string) {
+    return this.postsService.deletePost(userId, id);
   }
 }

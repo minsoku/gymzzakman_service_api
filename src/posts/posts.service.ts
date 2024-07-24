@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PaginatePostDto } from './dto/paginate-post.dto';
 import { CommonService } from 'src/common/common.service';
 import { PostBodyDto } from './dto/post.dto';
@@ -23,6 +27,36 @@ export class PostsService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {}
+
+  async deletePost(userId: number, id: string) {
+    const query = `SELECT author_id FROM POSTS WHERE author_id = ? AND id = ?`;
+    const checkUser = (await this.mysqlService.query(query, [userId, id])) as [
+      number,
+    ];
+    if (checkUser.length < 1) {
+      throw new ForbiddenException(
+        'deletePost : You can only delete your own posts.',
+      );
+    }
+
+    const url = `${this.configService.get(ENV_PROTOCOL)}${this.configService.get(ENV_DB_SERVER_API)}/community/post?id=${id}`;
+
+    try {
+      const response = await firstValueFrom(this.httpService.delete(url));
+      return {
+        statusCode: response.status,
+        success: true,
+        message: 'Delete Post',
+      };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        console.error('Axios Error:', error);
+        throw new InternalServerErrorException('DB_API : INTERNAL_ERROR');
+      }
+      throw error;
+    }
+    console.log(userId, id);
+  }
 
   async getTotalPostsCount(category: string, search: string) {
     let query = `SELECT COUNT(*) AS count FROM POSTS WHERE content LIKE '%${search}%'`;
